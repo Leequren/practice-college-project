@@ -11,12 +11,26 @@ const bufferOptsGet = {
         // console.log(url)
         // let data = await axios.get(url)
         // console.log(data)
-        if (link.split('.')[1]) {
-            const bufferInfo = fs.readFileSync(path.join(__dirname, '../', `docs/`, link), {encoding: "utf-8"})
-            console.log(bufferInfo)
-            console.log()
-            const responseData = JSON.stringify({data: bufferInfo})
-            reply.code(200).header('Content-Type', 'text/html; charset=utf-8;').send(bufferInfo.replaceAll(/(\r\n|\n|\r|\t)/gm, ""))
+        let splittedData = link.split('.')
+        if (splittedData[1]) {
+            let registeredData = ['html', 'css']
+            if (splittedData[1] in registeredData) {
+                const bufferInfo = fs.readFileSync(path.join(__dirname, '../', `docs/`, link), {encoding: "utf-8"})
+                console.log(bufferInfo)
+                console.log()
+                const responseData = JSON.stringify({data: bufferInfo})
+                reply.code(200).header('Content-Type', 'text/html; charset=utf-8;').send(bufferInfo.replaceAll(/(\r\n|\n|\r|\t)/gm, ""))
+            } else if (splittedData[1] === 'js') {
+                const bufferInfo = fs.readFileSync(path.join(__dirname, '../', `docs/`, link), {encoding: "utf-8"})
+                // console.log(123)
+                console.log(bufferInfo)
+                reply.code(200).header('Content-Type', 'text/plain; charset=uft-8;').send(bufferInfo)
+            } else {
+                const bufferInfo = fs.readFileSync(path.join(__dirname, '../', `docs/`, link), {encoding: "utf-8"})
+                // console.log(123)
+                console.log(bufferInfo)
+                reply.code(200).header('Content-Type', 'text/html; charset=utf-8;').send(bufferInfo.replaceAll(/(\r\n|\n|\r|\t)/gm, ""))
+            }
         }
     }
 }

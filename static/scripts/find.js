@@ -4,6 +4,33 @@ const savedDiv = document.querySelector('.saved-data')
 let links
 console.log(inputUrl, findButton)
 
+function parseLink(scriptContent) {
+    let rawMatch = scriptContent.match(/src="[\u{30}-\u{39}|\u{2e}|\u{61}-\u{7a}|\u{41}-\u{5a}|\u{2f}]+"/gu)
+    console.log(rawMatch[0])
+    return rawMatch[0].slice(5, rawMatch[0].length - 1)
+}
+
+function scriptParser(htmlContent) {
+    let rawMatches = htmlContent.matchAll(/<script\u{20}+src="[\u{30}-\u{39}|\u{2e}|\u{61}-\u{7a}|\u{41}-\u{5a}|\u{2f}]+"/gu)
+    // console.log(...rawMatches)
+    let srcScripts = []
+    for (let i of rawMatches) {
+        srcScripts.push(parseLink(i[0]))
+    }
+    return srcScripts
+}
+
+async function scriptToTags(src) {
+    let scriptTag = ``
+    for (let i of src) {
+        let scriptData = (await axios.get(`http://127.0.0.1:1070/buffer?link=${i}`)).data
+        console.log(scriptData)
+        scriptTag += `<script>\n${scriptData}\n</script>`
+    }
+    return scriptTag
+}
+
+
 function linkCssParser(htmlLinkContent) {
     let rawMatchesLinks = htmlLinkContent.match(/href="[\u{30}-\u{39}|\u{2e}|\u{61}-\u{7a}|\u{41}-\u{5a}|\u{2f}]+"/gu)
     // console.log(rawMatchesLinks)
@@ -47,14 +74,33 @@ async function openWindow(htmlContent) {
     console.log(cssParser(htmlContent))
     let cssLinks = cssParser(htmlContent)
     console.log(cssLinks)
-    let windowObjectReference = window.open('', '', 'popup')
-    console.log(htmlContent)
-    let styles = await linksToTags(cssParser(htmlContent))
-    console.log(styles)
-    windowObjectReference.document.head.innerHTML += styles
-    windowObjectReference.document.body.innerHTML = htmlContent;
+    // let windowObjectReference = window.open('about:blank', 'hello', 'popup')
+    // console.log(htmlContent)
+    // let styles = await linksToTags(cssParser(htmlContent))
+    // console.log(styles)
+    let scripts = await scriptToTags(scriptParser(htmlContent))
+    console.log(scripts)
+    //
+    const newWindow = window.open("", "new window", "popup");
+    newWindow.document.write('2344')
+    newWindow.document.write(
+        "<script>window.document.body.innerHTML = '123'</script>"
+    );
 
-    console.log(windowObjectReference)
+    // windowObjectReference.document.head.innerHTML += styles
+    // windowObjectReference.document.body.innerHTML = htmlContent;
+    // windowObjectReference.document.body.innerHTML += scripts
+    //
+    // // windowObjectReference.document.write(scripts)
+    // // windowObjectReference.document.write(scripts)
+    // windowObjectReference.onload = function () {
+    //     windowObjectReference.document.write('<h1>dsfsfd</h1>')
+    // }
+    //     windowObjectReference.document.head.innerHTML += styles
+    //     windowObjectReference.document.body.innerHTML = htmlContent;
+    //     windowObjectReference.document.body.innerHTML += scripts
+    // }
+    // console.log(windowObjectReference)
 }
 
 updateInfoAboutStorage()
