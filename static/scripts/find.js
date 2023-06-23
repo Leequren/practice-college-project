@@ -1,3 +1,4 @@
+// const axios = require("axios");
 const inputUrl = document.querySelector('input[name="key-word"]')
 const findButton = document.querySelector('button.find-urls')
 const savedDiv = document.querySelector('.saved-data')
@@ -61,7 +62,7 @@ async function linksToTags(links) {
     let cssData = ``
     for (let i of links) {
         console.log(i)
-        let dataLinkStyle = (await axios.get(`http://127.0.0.1:1070/buffer?link=${i}`)).data
+        let dataLinkStyle = (await axios.get(`/buffer?link=${i}`)).data
         console.log(dataLinkStyle)
         cssData += `<style>${dataLinkStyle}</style>`
     }
@@ -69,27 +70,47 @@ async function linksToTags(links) {
     return cssData
 }
 
+async function modifyHtmlByPng(htmlContent) {
+    let rawMatches = [...htmlContent.matchAll(/<img\u{20}+src="[\u{30}-\u{39}|\u{2e}|\u{61}-\u{7a}|\u{41}-\u{5a}|\u{2f}]+">/gu)]
+    // console.log(...rawMatches)
+    let usefulData = []
+    for (let raw of rawMatches) {
+        // console.log(raw[0])
+        let srcMatch = [...raw[0].match(/src="[\u{30}-\u{39}|\u{2e}|\u{61}-\u{7a}|\u{41}-\u{5a}|\u{2f}]+"/gu)]
+        // console.log(srcMatch)
+        let cleanUrl = srcMatch[0].slice(5, srcMatch[0].length - 1)
+        console.log(cleanUrl)
+        let data = (await axios.get(`/buffer?link=${cleanUrl}`)).data
+        console.log(data)
+        htmlContent = htmlContent.replaceAll(cleanUrl, `data:image/png;base64,${data}`)
+        // usefulData.push({curImg: raw[0]})
+        // tempData.push(i)
+    }
+    return htmlContent
+}
+
 async function openWindow(htmlContent) {
+    htmlContent = await modifyHtmlByPng(htmlContent)
     console.log(htmlContent)
     console.log(cssParser(htmlContent))
     let cssLinks = cssParser(htmlContent)
     console.log(cssLinks)
     // let windowObjectReference = window.open('about:blank', 'hello', 'popup')
     // console.log(htmlContent)
-    // let styles = await linksToTags(cssParser(htmlContent))
-    // console.log(styles)
+    let styles = await linksToTags(cssParser(htmlContent))
+    console.log(styles)
     let scripts = await scriptToTags(scriptParser(htmlContent))
     console.log(scripts)
     //
     const newWindow = window.open("", "new window", "popup");
-    newWindow.document.write('2344')
-    newWindow.document.write(
-        "<script>window.document.body.innerHTML = '123'</script>"
-    );
-
-    // windowObjectReference.document.head.innerHTML += styles
-    // windowObjectReference.document.body.innerHTML = htmlContent;
-    // windowObjectReference.document.body.innerHTML += scripts
+    // newWindow.document.write('2344')
+    // newWindow.document.write(
+    //     "<script>window.document.body.innerHTML = '123'</script>"
+    // );
+    //
+    newWindow.document.head.innerHTML += styles
+    newWindow.document.body.innerHTML = htmlContent;
+    newWindow.document.body.innerHTML += scripts
     //
     // // windowObjectReference.document.write(scripts)
     // // windowObjectReference.document.write(scripts)

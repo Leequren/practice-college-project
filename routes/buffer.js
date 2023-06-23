@@ -13,8 +13,8 @@ const bufferOptsGet = {
         // console.log(data)
         let splittedData = link.split('.')
         if (splittedData[1]) {
-            let registeredData = ['html', 'css']
-            if (splittedData[1] in registeredData) {
+
+            if (splittedData[1] === 'html' || splittedData[1] === 'css') {
                 const bufferInfo = fs.readFileSync(path.join(__dirname, '../', `docs/`, link), {encoding: "utf-8"})
                 console.log(bufferInfo)
                 console.log()
@@ -25,11 +25,11 @@ const bufferOptsGet = {
                 // console.log(123)
                 console.log(bufferInfo)
                 reply.code(200).header('Content-Type', 'text/plain; charset=uft-8;').send(bufferInfo)
-            } else {
-                const bufferInfo = fs.readFileSync(path.join(__dirname, '../', `docs/`, link), {encoding: "utf-8"})
+            } else if (splittedData[1] === 'png') {
+                const bufferInfo = fs.readFileSync(path.join(__dirname, '../', `docs/`, link), {encoding: "base64"})
                 // console.log(123)
                 console.log(bufferInfo)
-                reply.code(200).header('Content-Type', 'text/html; charset=utf-8;').send(bufferInfo.replaceAll(/(\r\n|\n|\r|\t)/gm, ""))
+                reply.code(200).header('Content-Type', 'text/html; charset=utf-8;').send(bufferInfo)
             }
         }
     }
